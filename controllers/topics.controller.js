@@ -8,6 +8,5 @@ exports.getAllTopics = (req, res, next) => {
     const topics = rows
     res.status(200).send({ topics })
 })
-.catch(next)
 
 }
