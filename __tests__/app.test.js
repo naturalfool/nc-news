@@ -66,8 +66,8 @@ describe("/api/articles/:article_id", () => {
       .expect(200)
       .then(({ body }) => {
         const article = body.article;
-        expect(typeof article).toBe("object")
-        expect(Array.isArray(article)).toBe(false)
+        expect(typeof article).toBe("object");
+        expect(Array.isArray(article)).toBe(false);
       });
   });
   test("200: article has correct properties", () => {
@@ -99,68 +99,122 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/100")
       .expect(404)
       .then(({ body }) => {
-        
         expect(body.msg).toBe("Article not found");
       });
   });
 });
 
 describe("/api/articles", () => {
-    test("GET: 200 returns an array of all article objects", () => {
-        return request(app)
-        .get("/api/articles")
-        .expect(200)
-        .then(({ body }) => {
-            expect(Array.isArray(body)).toBe(true)
-            expect(body.length).toBe(13)
-        })
-    })
-    test("GET: 200 all article objects have the correct properties matching the columns", () => {
-        return request(app)
-        .get("/api/articles")
-        .expect(200)
-        .then(({ body }) => {
-            body.forEach((article) => {
-                expect(article.hasOwnProperty("author"))
-                expect(article.hasOwnProperty("title"))
-                expect(article.hasOwnProperty("article_id"))
-                expect(article.hasOwnProperty("topic"))
-                expect(article.hasOwnProperty("created_at"))
-                expect(article.hasOwnProperty("votes"))
-                expect(article.hasOwnProperty("article_img_url"))
-                expect(article.hasOwnProperty("comment_count"))
-            })
-        })
-    })
-    test("GET: 200 articles are sorted by created_at in descending order", () => {
-        return request(app)
-        .get("/api/articles")
-        .expect(200)
-        .then(({ body }) => {
-            expect(body).toBeSortedBy("created_at", {
-                descending: true
-            })
-        })
-    })
-    test("GET: 200 article objects have a comment_count property that is equal to the number of comments associated to that article", () => {
-        return request(app)
-        .get("/api/articles")
-        .expect(200)
-        .then(({ body }) => {
-            
-            body.forEach((article) => {
-                expect(article.hasOwnProperty("comment_count"))
-            })
-            expect(body[0].comment_count).toBe(2)
-            expect(body[6].comment_count).toBe(11)
-        })
-    })
-    test("404: responds with an correct error message if the path is invalid", () => {
-        return request(app)
-          .get("/api/article")
-          .expect(404)
-          .then(({ body }) => {
-            expect(body.msg).toBe("path not found");
-          });
+  test("GET: 200 returns an array of all article objects", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body)).toBe(true);
+        expect(body.length).toBe(13);
       });
-})
+  });
+  test("GET: 200 all article objects have the correct properties matching the columns", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        body.forEach((article) => {
+          expect(article.hasOwnProperty("author"));
+          expect(article.hasOwnProperty("title"));
+          expect(article.hasOwnProperty("article_id"));
+          expect(article.hasOwnProperty("topic"));
+          expect(article.hasOwnProperty("created_at"));
+          expect(article.hasOwnProperty("votes"));
+          expect(article.hasOwnProperty("article_img_url"));
+          expect(article.hasOwnProperty("comment_count"));
+        });
+      });
+  });
+  test("GET: 200 articles are sorted by created_at in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+  test("GET: 200 article objects have a comment_count property that is equal to the number of comments associated to that article", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        body.forEach((article) => {
+          expect(article.hasOwnProperty("comment_count"));
+        });
+        expect(body[0].comment_count).toBe(2);
+        expect(body[6].comment_count).toBe(11);
+      });
+  });
+  test("404: responds with an correct error message if the path is invalid", () => {
+    return request(app)
+      .get("/api/article")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("path not found");
+      });
+  });
+});
+describe("/api/articles/:article_id/comments", () => {
+  test("GET 200: should return an array of comment objects for the article matching the article_id", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const comments = body.rows;
+        expect(Array.isArray(comments)).toBe(true);
+        expect(comments.length).toBe(11);
+        comments.forEach((comment) => {
+          expect(comment.article_id).toBe(1);
+        });
+      });
+  });
+  test("GET 200: returned comment objects should have the correct properties", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const comments = body.rows;
+        comments.forEach((comment) => {
+          expect(comment.hasOwnProperty("comment_id"));
+          expect(comment.hasOwnProperty("votes"));
+          expect(comment.hasOwnProperty("created_at"));
+          expect(comment.hasOwnProperty("author"));
+          expect(comment.hasOwnProperty("body"));
+          expect(comment.hasOwnProperty("article_id"));
+        });
+      });
+  });
+  test("GET 200: returns an empty array if the article exists but there are no comments on it", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.rows)).toBe(true);
+        expect(body.rows.length).toBe(0);
+      });
+  });
+  test("GET 400: responds with an approriate error message when article_id is not a number", () => {
+    return request(app)
+      .get("/api/articles/article_one/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("GET 404: responds with appropriate error message when article_id is that of an article that doesnt exist", () => {
+    return request(app)
+      .get("/api/articles/100/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article not found");
+      });
+  });
+});

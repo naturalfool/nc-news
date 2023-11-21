@@ -3,6 +3,7 @@ const { getAllTopics } = require("./controllers/topics.controller")
 const { getAPIEndpoints } = require("./controllers/api.controller")
 const { getArticleById, getAllArticles } = require("./controllers/articles.controller");
 const { handlePostgresErrors, handleCustomErrors, handleServerErrors } = require("./errors");
+const { getCommentsByArticleId } = require("./controllers/comments.controller")
 
 const app = express();
 app.use(express.json());
@@ -12,7 +13,7 @@ app.get("/api", getAPIEndpoints)
 app.get("/api/articles", getAllArticles)
 app.get("/api/articles/:article_id", getArticleById)
 app.get("/api/articles/word_instead_of_number", getArticleById)
-
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 
 app.use("/*", (req, res) => {
 res.status(404).send({ msg: "path not found" })
