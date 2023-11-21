@@ -99,8 +99,68 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/100")
       .expect(404)
       .then(({ body }) => {
-        console.log(body.msg)
+        
         expect(body.msg).toBe("Article not found");
       });
   });
 });
+
+describe("/api/articles", () => {
+    test("GET: 200 returns an array of all article objects", () => {
+        return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+            expect(Array.isArray(body)).toBe(true)
+            expect(body.length).toBe(13)
+        })
+    })
+    test("GET: 200 all article objects have the correct properties matching the columns", () => {
+        return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+            body.forEach((article) => {
+                expect(article.hasOwnProperty("author"))
+                expect(article.hasOwnProperty("title"))
+                expect(article.hasOwnProperty("article_id"))
+                expect(article.hasOwnProperty("topic"))
+                expect(article.hasOwnProperty("created_at"))
+                expect(article.hasOwnProperty("votes"))
+                expect(article.hasOwnProperty("article_img_url"))
+                expect(article.hasOwnProperty("comment_count"))
+            })
+        })
+    })
+    test("GET: 200 articles are sorted by created_at in descending order", () => {
+        return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+            expect(body).toBeSortedBy("created_at", {
+                descending: true
+            })
+        })
+    })
+    test("GET: 200 article objects have a comment_count property that is equal to the number of comments associated to that article", () => {
+        return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+            
+            body.forEach((article) => {
+                expect(article.hasOwnProperty("comment_count"))
+            })
+            expect(body[0].comment_count).toBe(2)
+            expect(body[6].comment_count).toBe(11)
+        })
+    })
+    test("404: responds with an correct error message if the path is invalid", () => {
+        return request(app)
+          .get("/api/article")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("path not found");
+          });
+      });
+})
