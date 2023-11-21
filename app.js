@@ -13,7 +13,7 @@ app.get("/api/articles/:article_id", getArticleById)
 app.get("/api/articles/word_instead_of_number", getArticleById)
 
 
-app.get("/invalid_path", (req, res) => {
+app.use("/*", (req, res) => {
 res.status(404).send({ msg: "path not found" })
 })
 

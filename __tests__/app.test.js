@@ -66,7 +66,8 @@ describe("/api/articles/:article_id", () => {
       .expect(200)
       .then(({ body }) => {
         const article = body.article;
-        expect(typeof article).toBe("object");
+        expect(typeof article).toBe("object")
+        expect(Array.isArray(article)).toBe(false)
       });
   });
   test("200: article has correct properties", () => {
@@ -85,20 +86,21 @@ describe("/api/articles/:article_id", () => {
         expect(article.hasOwnProperty("article_img_url")).toBe(true);
       });
   });
-  test("404: returns approriate error message if given an article id that isnt an integer", () => {
+  test("400: returns approriate error message if given an article id that isnt an integer", () => {
     return request(app)
       .get("/api/articles/word_instead_of_number")
-      .expect(404)
+      .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("path not found");
+        expect(body.msg).toBe("Bad request");
       });
   });
   test("404: returns appropriate error message if given an article id that is a number, but doesnt exist", () => {
     return request(app)
-      .get("/api/articles/10000")
+      .get("/api/articles/100")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe('path not found')
+        console.log(body.msg)
+        expect(body.msg).toBe("Article not found");
       });
   });
 });
