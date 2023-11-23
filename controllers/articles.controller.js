@@ -1,4 +1,5 @@
-const { selectArticleById, fetchAllArticles } = require("../models/articles.model")
+const { selectArticleById, fetchAllArticles, updateArticleVotesById } = require("../models/articles.model")
+const { checkArticleExists } = require("../utils")
 
 
 exports.getArticleById = (req, res, next) => {
@@ -19,4 +20,24 @@ exports.getAllArticles = (req, res, next) => {
         const articles = rows
         res.status(200).send(articles)
     })
+}
+
+exports.patchArticleVotesById = (req, res, next) => {
+const { article_id } = req.params
+const { inc_votes } = req.body
+    if (typeof inc_votes !== 'number'){
+        res.status(400).send({msg: "Bad request"})
+    } else {
+        const patchPromises = [updateArticleVotesById(article_id, inc_votes), checkArticleExists(article_id)]
+
+Promise.all(patchPromises)
+.then((resolvedPromises) => {
+    const patchedArticles = resolvedPromises[0].rows
+    res.status(200).send(patchedArticles)
+})
+
+    .catch((err) => {
+        next(err)
+    })
+}
 }
