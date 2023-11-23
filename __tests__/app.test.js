@@ -314,7 +314,6 @@ describe("POST /api/articles/:article_id/comments", () => {
       })
       .expect(201)
       .then(({ body }) => {
-        console.log(body.rows);
         expect(body.rows[0].hasOwnProperty("article_id"));
         expect(body.rows[0].hasOwnProperty("author"));
         expect(body.rows[0].hasOwnProperty("body"));
@@ -391,4 +390,32 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(body.msg).toBe("Bad request");
       });
   });
+  test("PATCH 404: responds with correct error message when given a valid but non-existent article_id", () => {
+    return request(app)
+    .patch("/api/articles/150")
+    .send({ inc_votes: 5 })
+    .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toBe("Article not found")
+    })
+  })
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("DELETE 204: deletes a comment based on the comment_id and doesnt return it", () => {
+    return request(app)
+      .delete("/api/comments/3")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      });
+  });
+  test("DELETE 404: responds with correct error message when given a comment_id that doesnt exist", () => {
+    return request(app)
+    .delete("/api/comments/100")
+    .expect(404)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Comment not found")
+    })
+  })
 });
