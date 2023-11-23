@@ -1,9 +1,11 @@
 const { selectArticleById, fetchAllArticles, updateArticleVotesById } = require("../models/articles.model")
-const { checkArticleExists } = require("../utils")
+const { checkArticleExists, checkTopicExists } = require("../utils")
+const {selectArticleByTopic } = require("../models/topics.model")
 
 
 exports.getArticleById = (req, res, next) => {
     const { article_id } = req.params
+
 
 selectArticleById(article_id).then(({ rows }) => {
     const article = rows[0]
@@ -15,11 +17,22 @@ selectArticleById(article_id).then(({ rows }) => {
 }
 
 exports.getAllArticles = (req, res, next) => {
+const { topic } = req.query
 
-    fetchAllArticles().then(({rows}) => {
-        const articles = rows
-        res.status(200).send(articles)
-    })
+
+const promises = [fetchAllArticles(topic)]
+
+if (topic){
+    promises.push(checkTopicExists(topic))
+}
+Promise.all(promises)
+.then((resolvedPromises) => {
+    const articles = resolvedPromises
+    res.status(200).send(articles)
+})
+.catch((err) => {
+    next(err)
+})
 }
 
 exports.patchArticleVotesById = (req, res, next) => {

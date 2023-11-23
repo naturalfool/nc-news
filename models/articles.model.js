@@ -16,12 +16,24 @@ exports.selectArticleById = (article_id) => {
     });
 };
 
-exports.fetchAllArticles = () => {
-  return db.query(`SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count
-    FROM articles
-    LEFT JOIN comments ON articles.article_id = comments.article_id
-    GROUP BY articles.author, articles.title, articles.article_id
-    ORDER BY articles.created_at DESC;`);
+exports.fetchAllArticles = (topic) => {
+  let queryStr = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url`
+let queryValues = []
+
+  if (topic){
+    queryValues.push(topic)
+  queryStr += ` FROM articles
+  WHERE topic = $1`
+} else {
+  queryStr += `, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count
+  FROM articles
+  LEFT JOIN comments ON articles.article_id = comments.article_id
+  GROUP BY articles.author, articles.title, articles.article_id
+  ORDER BY articles.created_at DESC`
+}
+
+  return db.query(queryStr, queryValues)
+   
 };
 
 exports.updateArticleVotesById = (article_id, inc_votes) => {
