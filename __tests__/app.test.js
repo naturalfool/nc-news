@@ -418,4 +418,20 @@ describe("DELETE /api/comments/:comment_id", () => {
       expect(body.msg).toBe("Comment not found")
     })
   })
+  test("DELETE 404: responds with correct error message when given valid but non-existent comment_id", () => {
+    return request(app)
+    .delete("/api/comments/100")
+    .expect(404)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Comment not found")
+    })
+  })
+  test("DELETE 400: responds with a correct error message when given a an invalid comment_id", () => {
+    return request(app)
+    .delete("/api/comments/ten")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Bad request")
+    })
+  })
 });
