@@ -38,7 +38,6 @@ removeCommentById(comment_id).then(() => {
     res.status(204).send({})
 })
 .catch((err) => {
-    console.log(err)
     next(err)
 })
 }
