@@ -110,8 +110,9 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        expect(Array.isArray(body)).toBe(true);
-        expect(body.length).toBe(13);
+const articles = body[0].rows
+        expect(Array.isArray(articles)).toBe(true);
+        expect(articles.length).toBe(13);
       });
   });
   test("GET: 200 all article objects have the correct properties matching the columns", () => {
@@ -146,11 +147,12 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        body.forEach((article) => {
+        const articles = body[0].rows
+        articles.forEach((article) => {
           expect(article.hasOwnProperty("comment_count"));
         });
-        expect(body[0].comment_count).toBe(2);
-        expect(body[6].comment_count).toBe(11);
+        expect(articles[0].comment_count).toBe(2);
+        expect(articles[6].comment_count).toBe(11);
       });
   });
   test("404: responds with an correct error message if the path is invalid", () => {
@@ -392,13 +394,13 @@ describe("PATCH /api/articles/:article_id", () => {
   });
   test("PATCH 404: responds with correct error message when given a valid but non-existent article_id", () => {
     return request(app)
-    .patch("/api/articles/150")
-    .send({ inc_votes: 5 })
-    .expect(404)
-    .then(({body}) => {
-      expect(body.msg).toBe("Article not found")
-    })
-  })
+      .patch("/api/articles/150")
+      .send({ inc_votes: 5 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article not found");
+      });
+  });
 });
 
 describe("DELETE /api/comments/:comment_id", () => {
@@ -412,43 +414,75 @@ describe("DELETE /api/comments/:comment_id", () => {
   });
   test("DELETE 404: responds with correct error message when given valid but non-existent comment_id", () => {
     return request(app)
-    .delete("/api/comments/100")
-    .expect(404)
-    .then(({ body }) => {
-      expect(body.msg).toBe("Comment not found")
-    })
-  })
+      .delete("/api/comments/100")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment not found");
+      });
+  });
   test("DELETE 400: responds with a correct error message when given a an invalid comment_id", () => {
     return request(app)
-    .delete("/api/comments/ten")
-    .expect(400)
-    .then(({ body }) => {
-      expect(body.msg).toBe("Bad request")
-    })
-  })
+      .delete("/api/comments/ten")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
 });
 
 describe("GET /api/users", () => {
   test("GET 200: returns an array of all user objects", () => {
     return request(app)
-    .get("/api/users")
-    .expect(200)
-    .then(({body}) => {
-      const users = body
-      expect(users.length).toBe(4)
-      users.forEach((user) => {
-        expect(user.hasOwnProperty('username'))
-        expect(user.hasOwnProperty('name'))
-        expect(user.hasOwnProperty('avatar_url'))
-      })
-    })
-  })
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        const users = body;
+        expect(users.length).toBe(4);
+        users.forEach((user) => {
+          expect(user.hasOwnProperty("username"));
+          expect(user.hasOwnProperty("name"));
+          expect(user.hasOwnProperty("avatar_url"));
+        });
+      });
+  });
   test("GET 404: should return correct error message if users is spelt wrong or the path is otherwise incorrect", () => {
     return request(app)
-    .get("/api/useers")
-    .expect(404)
+      .get("/api/useers")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("path not found");
+      });
+  });
+});
+
+describe("GET: GET /api/articles (topic query)", () => {
+  test("GET 200: returns an array of article objects filtered by specific topic", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        const articles = body[0].rows;
+        expect(articles.length).toBe(12);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+  test("GET 200: returns an empty array if topic exists but there are no articles for it", () => {
+    return request(app)
+    .get("/api/articles?topic=paper")
+    .expect(200)
     .then(({ body }) => {
-      expect(body.msg).toBe('path not found')
+      const response = body[0].rows
+      expect(response.length).toBe(0)
     })
   })
-})
+  test("GET 404: returns correct error message passed topic that is not a string", () => {
+    return request(app)
+    .get("/api/articles?topic=sandwiches")
+    .expect(404)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Topic not found")
+    })
+  })
+});
