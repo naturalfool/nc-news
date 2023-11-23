@@ -23,3 +23,14 @@ exports.fetchAllArticles = () => {
     GROUP BY articles.author, articles.title, articles.article_id
     ORDER BY articles.created_at DESC;`);
 };
+
+exports.updateArticleVotesById = (article_id, inc_votes) => {
+
+    return db.query(
+      `UPDATE articles
+SET votes = votes + $1
+WHERE article_id = $2 RETURNING*;`,
+      [inc_votes, article_id]
+    );
+  }
+

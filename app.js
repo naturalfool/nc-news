@@ -1,7 +1,7 @@
 const express = require("express")
 const { getAllTopics } = require("./controllers/topics.controller")
 const { getAPIEndpoints } = require("./controllers/api.controller")
-const { getArticleById, getAllArticles } = require("./controllers/articles.controller");
+const { getArticleById, getAllArticles, patchArticleVotesById } = require("./controllers/articles.controller");
 const { handlePostgresErrors, handleCustomErrors, handleServerErrors } = require("./errors");
 const { getCommentsByArticleId, postCommentByArticleId } = require("./controllers/comments.controller")
 
@@ -16,6 +16,8 @@ app.get("/api/articles/word_instead_of_number", getArticleById)
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 
 app.post("/api/articles/:article_id/comments", postCommentByArticleId)
+
+app.patch("/api/articles/:article_id", patchArticleVotesById)
 
 app.all("/*", (req, res) => {
 res.status(404).send({ msg: "path not found" })

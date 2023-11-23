@@ -220,62 +220,175 @@ describe("/api/articles/:article_id/comments", () => {
 });
 
 describe("POST /api/articles/:article_id/comments", () => {
-    test("POST 201: posts a new comment to the article provded by the article_id and returns the new comment", () => {
-        return request(app)
-        .post("/api/articles/1/comments")
-        .send({
-            username: "icellusedkars",
-            body: "What an incredible article. I am in awe of this."
-        })
-        .expect(201)
-        .then(({ body }) => {
-            const newComment = body
-            expect(typeof newComment).toBe('object')
-            expect(Array.isArray(newComment)).toBe(false)
-            expect(newComment.author).toBe("icellusedkars")
-            expect(newComment.body).toBe('What an incredible article. I am in awe of this.')
-        })
-    })
-    test("POST 201: the new comment object has the same properties that all the other comments have", () => {
-        return request(app)
-        .post("/api/articles/1/comments")
-        .send({
-            username: "icellusedkars",
-            body: "What an incredible article. I am in awe of this."
-        })
-        .expect(201)
-        .then(({ body }) => {
-            expect(body.hasOwnProperty("comment_id"))
-            expect(body.hasOwnProperty("body"))
-            expect(body.hasOwnProperty("author"))
-            expect(body.hasOwnProperty("article_id"))
-            expect(body.hasOwnProperty("created_at"))
-            expect(body.hasOwnProperty("votes"))
-        })
-    })
-    test("POST 400: responds with appropriate error message when the article_id provided is not a number", () => {
-        return request(app)
-        .post("/api/articles/article_one/comments")
-        .send({
-            username: "icellusedkars",
-            body: "What an incredible article. I am in awe of this."
-        })
-        .expect(400)
-        .then(({ body }) => {
-            expect(body.msg).toBe('Bad request')
-        })
-    })
-    test("POST 404: responds with appropriate error message when article_id is that of an article that doesnt exist", () => {
-        return request(app)
-          .post("/api/articles/100/comments")
-          .send({
-            username: "icellusedkars",
-            body: "What an incredible article. I am in awe of this."
-        })
-          .expect(404)
-          .then(({ body }) => {
-            expect(body.msg).toBe("Article not found");
-          });
+  test("POST 201: posts a new comment to the article provded by the article_id and returns the new comment", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "icellusedkars",
+        body: "What an incredible article. I am in awe of this.",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        const newComment = body.rows[0];
+        expect(typeof newComment).toBe("object");
+        expect(Array.isArray(newComment)).toBe(false);
+        expect(newComment.author).toBe("icellusedkars");
+        expect(newComment.body).toBe(
+          "What an incredible article. I am in awe of this."
+        );
       });
-})
+  });
+  test("POST 201: the new comment object has the same properties that all the other comments have", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "icellusedkars",
+        body: "What an incredible article. I am in awe of this.",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.hasOwnProperty("comment_id"));
+        expect(body.hasOwnProperty("body"));
+        expect(body.hasOwnProperty("author"));
+        expect(body.hasOwnProperty("article_id"));
+        expect(body.hasOwnProperty("created_at"));
+        expect(body.hasOwnProperty("votes"));
+      });
+  });
+  test("POST 400: responds with appropriate error message when the article_id provided is not a number", () => {
+    return request(app)
+      .post("/api/articles/article_one/comments")
+      .send({
+        username: "icellusedkars",
+        body: "What an incredible article. I am in awe of this.",
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("POST 404: responds with appropriate error message when article_id is that of an article that doesnt exist", () => {
+    return request(app)
+      .post("/api/articles/100/comments")
+      .send({
+        username: "icellusedkars",
+        body: "What an incredible article. I am in awe of this.",
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Article not found");
+      });
+  });
+  test("POST 400: responds with correct error message when comment body is not in the right format", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "icellusedkars",
+        body: 12345,
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("POST 404: responds with correct error message when username does not exist", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "VerySadKlingon",
+        body: "This article made me cry, also I am a klingon from Star Trek",
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid username");
+      });
+  });
+  test("POST 201: responds with correct article object even when unnecessary properties are on the request", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "icellusedkars",
+        body: "What an incredible article. I am in awe of this.",
+        favourite_colour: "blue",
+        votes: 5,
+      })
+      .expect(201)
+      .then(({ body }) => {
+        console.log(body.rows);
+        expect(body.rows[0].hasOwnProperty("article_id"));
+        expect(body.rows[0].hasOwnProperty("author"));
+        expect(body.rows[0].hasOwnProperty("body"));
+        expect(body.rows[0].hasOwnProperty("comment_id"));
+        expect(body.rows[0].hasOwnProperty("created_at"));
+        expect(body.rows[0].hasOwnProperty("votes"));
+        expect(!body.rows[0].hasOwnProperty("favourite_colour"));
+      });
+  });
+});
 
+describe("PATCH /api/articles/:article_id", () => {
+  test("PATCH 200: responds with a complete article object with all the correct properties", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: 5 })
+      .expect(200)
+      .then(({ body }) => {
+        const article = body[0];
+        expect(article.hasOwnProperty("article_id"));
+        expect(article.hasOwnProperty("title"));
+        expect(article.hasOwnProperty("topic"));
+        expect(article.hasOwnProperty("author"));
+        expect(article.hasOwnProperty("body"));
+        expect(article.hasOwnProperty("created_at"));
+        expect(article.hasOwnProperty("votes"));
+        expect(article.hasOwnProperty("article_img_url"));
+      });
+  });
+  test("PATCH 200: responds with an article object where the votes are increased by the correct amount", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: 5 })
+      .expect(200)
+      .then(({ body }) => {
+        const article = body[0];
+        expect(article.votes).toBe(105);
+      });
+  });
+  test("PATCH 200: responds with an article object where the votes are decreased by the correct amount", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: -10 })
+      .expect(200)
+      .then(({ body }) => {
+        const article = body[0];
+        expect(article.votes).toBe(90);
+      });
+  });
+  test("PATCH 400: responds with correct error when inc_vote is of invalid type", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: "not a number" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("PATCH 400: responds with a correct error when article_id is not valid", () => {
+    return request(app)
+      .patch("/api/articles/numberone")
+      .send({ inc_votes: 5 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("PATCH 400: responds with correct error when inc_votes is not included in the request", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
