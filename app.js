@@ -3,7 +3,7 @@ const { getAllTopics } = require("./controllers/topics.controller")
 const { getAPIEndpoints } = require("./controllers/api.controller")
 const { getArticleById, getAllArticles, patchArticleVotesById } = require("./controllers/articles.controller");
 const { handlePostgresErrors, handleCustomErrors, handleServerErrors } = require("./errors");
-const { getCommentsByArticleId, postCommentByArticleId } = require("./controllers/comments.controller")
+const { getCommentsByArticleId, postCommentByArticleId, deleteCommentById } = require("./controllers/comments.controller")
 
 const app = express();
 app.use(express.json());
@@ -18,6 +18,8 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 app.post("/api/articles/:article_id/comments", postCommentByArticleId)
 
 app.patch("/api/articles/:article_id", patchArticleVotesById)
+
+app.delete("/api/comments/:comment_id", deleteCommentById)
 
 app.all("/*", (req, res) => {
 res.status(404).send({ msg: "path not found" })

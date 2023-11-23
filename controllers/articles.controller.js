@@ -28,12 +28,12 @@ const { inc_votes } = req.body
     if (typeof inc_votes !== 'number'){
         res.status(400).send({msg: "Bad request"})
     } else {
-        const patchPromises = [updateArticleVotesById(article_id, inc_votes), checkArticleExists(article_id)]
+        const patchPromise = [updateArticleVotesById(article_id, inc_votes), checkArticleExists(article_id)]
 
-Promise.all(patchPromises)
-.then((resolvedPromises) => {
-    const patchedArticles = resolvedPromises[0].rows
-    res.status(200).send(patchedArticles)
+Promise.all(patchPromise)
+.then((resolvedPromise) => {
+    const patchedArticle = resolvedPromise[0].rows
+    res.status(200).send(patchedArticle)
 })
 
     .catch((err) => {
