@@ -113,7 +113,38 @@ describe("/api/articles/:article_id", () => {
       });
   });
 });
+describe("articles queries, sort_by & order", () => {
+    test("GET 200: returns articles with the default sorted_by set to created_at, with the latest first", () => {
+      return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toBeSortedBy('created_at', {
+          descending: true
+        })
+      })
+    })
 
+  test("GET 200: created_at can also be sorted in ascending order", () => {
+    return request(app)
+    .get("/api/articles?order=asc")
+    .expect(200)
+    .then(({ body }) => {
+      expect(body).toBeSortedBy('created_at', {
+        ascending: true
+      })
+    })
+  })
+  test("GET 400: responds with an appropriate error message if order query is invalid", () => {
+    return request(app)
+    .get("/api/articles?order=hotdog")
+    .expect(400)
+    .then(({ body }) => {
+      console.log(body)
+      expect(body.msg).toBe("Bad request")
+    })
+  })
+})
 describe("/api/articles", () => {
   test("GET: 200 returns an array of all article objects", () => {
     return request(app)
