@@ -65,7 +65,7 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-        const article = body.article;
+        const article = body;
         expect(typeof article).toBe("object");
         expect(Array.isArray(article)).toBe(false);
       });
@@ -75,7 +75,7 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-        const article = body.article;
+        const article = body
         expect(article.hasOwnProperty("author")).toBe(true);
         expect(article.hasOwnProperty("title")).toBe(true);
         expect(article.hasOwnProperty("article_id")).toBe(true);
@@ -86,6 +86,16 @@ describe("/api/articles/:article_id", () => {
         expect(article.hasOwnProperty("article_img_url")).toBe(true);
       });
   });
+  test("GET 200: article object also has a comment_count property that is equal to the amount of comments on that article", () => {
+    return request(app)
+    .get("/api/articles/1")
+    .expect(200)
+    .then(({ body }) => {
+      expect(body.hasOwnProperty('comment_count'))
+      expect(body.comment_count).toBe(11)
+
+    })
+  })
   test("400: returns approriate error message if given an article id that isnt an integer", () => {
     return request(app)
       .get("/api/articles/word_instead_of_number")
@@ -110,7 +120,7 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-const articles = body[0].rows
+const articles = body
         expect(Array.isArray(articles)).toBe(true);
         expect(articles.length).toBe(13);
       });
@@ -147,7 +157,7 @@ const articles = body[0].rows
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        const articles = body[0].rows
+        const articles = body
         articles.forEach((article) => {
           expect(article.hasOwnProperty("comment_count"));
         });
@@ -170,7 +180,7 @@ describe("/api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        const comments = body.comments.rows;
+        const comments = body.comments
         expect(Array.isArray(comments)).toBe(true);
         expect(comments.length).toBe(11);
         comments.forEach((comment) => {
@@ -183,7 +193,7 @@ describe("/api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        const comments = body.comments.rows;
+        const comments = body.comments
         comments.forEach((comment) => {
           expect(comment.hasOwnProperty("comment_id"));
           expect(comment.hasOwnProperty("votes"));
@@ -199,8 +209,8 @@ describe("/api/articles/:article_id/comments", () => {
       .get("/api/articles/2/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(Array.isArray(body.comments.rows)).toBe(true);
-        expect(body.comments.rows.length).toBe(0);
+        expect(Array.isArray(body.comments)).toBe(true);
+        expect(body.comments.length).toBe(0);
       });
   });
   test("GET 400: responds with an approriate error message when article_id is not a number", () => {
@@ -461,7 +471,7 @@ describe("GET: GET /api/articles (topic query)", () => {
       .get("/api/articles?topic=mitch")
       .expect(200)
       .then(({ body }) => {
-        const articles = body[0].rows;
+        const articles = body;
         expect(articles.length).toBe(12);
         articles.forEach((article) => {
           expect(article.topic).toBe("mitch");
@@ -473,7 +483,7 @@ describe("GET: GET /api/articles (topic query)", () => {
     .get("/api/articles?topic=paper")
     .expect(200)
     .then(({ body }) => {
-      const response = body[0].rows
+      const response = body
       expect(response.length).toBe(0)
     })
   })
@@ -486,3 +496,4 @@ describe("GET: GET /api/articles (topic query)", () => {
     })
   })
 });
+

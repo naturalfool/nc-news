@@ -9,7 +9,7 @@ const commentsPromises = [selectCommentsByArticleId(article_id), checkArticleExi
 
 Promise.all(commentsPromises)
 .then((resolvedPromises) => {
-    const comments = resolvedPromises[0]
+    const comments = resolvedPromises[0].rows
     res.status(200).send({comments: comments})
 })
 .catch(next)

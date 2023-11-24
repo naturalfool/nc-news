@@ -13,7 +13,6 @@ app.get("/api/topics", getAllTopics)
 app.get("/api", getAPIEndpoints)
 app.get("/api/articles", getAllArticles)
 app.get("/api/articles/:article_id", getArticleById)
-app.get("/api/articles/word_instead_of_number", getArticleById)
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 app.get("/api/users", getUsers)
 
