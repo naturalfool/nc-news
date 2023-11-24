@@ -18,24 +18,41 @@ exports.selectArticleById = (article_id) => {
       }
     });
 };
-
-exports.fetchAllArticles = (topic) => {
+exports.fetchAllArticles = (topic, order) => {
   let queryStr = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url`
 let queryValues = []
 
-  if (topic){
+  if (topic && !order){
     queryValues.push(topic)
   queryStr += ` FROM articles
   WHERE topic = $1`
-} else {
+  return db.query(queryStr, queryValues)
+} else if (!topic && !order) {
   queryStr += `, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count
   FROM articles
   LEFT JOIN comments ON articles.article_id = comments.article_id
   GROUP BY articles.author, articles.title, articles.article_id
   ORDER BY articles.created_at DESC`
+  return db.query(queryStr)
+}
+if (order){
+queryValues.push(order)
+  queryStr += `, CAST(COUNT(comments.comment_id) AS INTEGER) AS comment_count
+  FROM articles
+  LEFT JOIN comments ON articles.article_id = comments.article_id
+  GROUP BY articles.author, articles.title, articles.article_id
+  ORDER BY articles.created_at ASC`
+  return db.query(queryStr)
+
+} else if (topic && order){
+  queryValues.push(topic)
+  queryStr += ` FROM articles
+  WHERE topic = $1
+  GROUP BY articles.author, articles.title, articles.article_id
+  ORDER BY articles.created_at ASC`
+  return db.query(queryStr, queryValues)
 }
 
-  return db.query(queryStr, queryValues)
    
 };
 

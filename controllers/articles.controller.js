@@ -7,6 +7,7 @@ exports.getArticleById = (req, res, next) => {
     const { article_id } = req.params
 
 
+
 selectArticleById(article_id).then(({ rows }) => {
     const article = rows[0]
     res.status(200).send(article)
@@ -17,10 +18,11 @@ selectArticleById(article_id).then(({ rows }) => {
 }
 
 exports.getAllArticles = (req, res, next) => {
-const { topic } = req.query
-
-
-const promises = [fetchAllArticles(topic)]
+const { topic, order } = req.query
+if (order && order !== 'asc'){
+    res.status(400).send({msg: "Bad request"})
+} else {
+const promises = [fetchAllArticles(topic, order)]
 
 if (topic){
     promises.push(checkTopicExists(topic))
@@ -32,9 +34,10 @@ Promise.all(promises)
 })
 .catch((err) => {
     next(err)
+    console.log(err)
 })
 }
-
+}
 exports.patchArticleVotesById = (req, res, next) => {
 const { article_id } = req.params
 const { inc_votes } = req.body
