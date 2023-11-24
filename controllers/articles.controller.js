@@ -9,7 +9,7 @@ exports.getArticleById = (req, res, next) => {
 
 selectArticleById(article_id).then(({ rows }) => {
     const article = rows[0]
-    res.status(200).send({ article })
+    res.status(200).send(article)
 })
 .catch((err) => {
     next(err)
@@ -27,7 +27,7 @@ if (topic){
 }
 Promise.all(promises)
 .then((resolvedPromises) => {
-    const articles = resolvedPromises
+    const articles = resolvedPromises[0].rows
     res.status(200).send(articles)
 })
 .catch((err) => {
