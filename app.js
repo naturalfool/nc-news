@@ -5,10 +5,12 @@ const { getArticleById, getAllArticles, patchArticleVotesById } = require("./con
 const { handlePostgresErrors, handleCustomErrors, handleServerErrors } = require("./errors");
 const { getCommentsByArticleId, postCommentByArticleId, deleteCommentById, patchCommentVotesById } = require("./controllers/comments.controller")
 const { getUsers, getUserByUsername } = require("./controllers/users.controller")
-// const cors = require('cors')
+const cors = require('cors')
+
+console.log(cors)
 
 const app = express();
-// app.use(cors());
+app.use(cors());
 app.use(express.json());
 
 
