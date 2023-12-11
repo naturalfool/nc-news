@@ -34,7 +34,6 @@ Promise.all(promises)
 })
 .catch((err) => {
     next(err)
-    console.log(err)
 })
 }
 }

@@ -1,6 +1,6 @@
 const express = require("express")
-const { getAllTopics } = require("./controllers/topics.controller")
-const { getAPIEndpoints } = require("./controllers/api.controller")
+const getAllTopics = require("./controllers/topics.controller")
+const getAPIEndpoints = require("./controllers/api.controller")
 const { getArticleById, getAllArticles, patchArticleVotesById } = require("./controllers/articles.controller");
 const { handlePostgresErrors, handleCustomErrors, handleServerErrors } = require("./errors");
 const { getCommentsByArticleId, postCommentByArticleId, deleteCommentById, patchCommentVotesById } = require("./controllers/comments.controller")
@@ -10,6 +10,7 @@ const cors = require('cors')
 const app = express();
 app.use(cors());
 app.use(express.json());
+console.log(typeof getAllTopics, typeof getAPIEndpoints, typeof getAllArticles, typeof getArticleById, typeof getCommentsByArticleId, typeof getUsers, typeof getUserByUsername)
 
 app.get("/api/topics", getAllTopics)
 app.get("/api", getAPIEndpoints)

@@ -75,7 +75,7 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-        const article = body
+        const article = body;
         expect(article.hasOwnProperty("author")).toBe(true);
         expect(article.hasOwnProperty("title")).toBe(true);
         expect(article.hasOwnProperty("article_id")).toBe(true);
@@ -88,14 +88,13 @@ describe("/api/articles/:article_id", () => {
   });
   test("GET 200: article object also has a comment_count property that is equal to the amount of comments on that article", () => {
     return request(app)
-    .get("/api/articles/1")
-    .expect(200)
-    .then(({ body }) => {
-      expect(body.hasOwnProperty('comment_count'))
-      expect(body.comment_count).toBe(11)
-
-    })
-  })
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.hasOwnProperty("comment_count"));
+        expect(body.comment_count).toBe(11);
+      });
+  });
   test("400: returns approriate error message if given an article id that isnt an integer", () => {
     return request(app)
       .get("/api/articles/word_instead_of_number")
@@ -116,41 +115,40 @@ describe("/api/articles/:article_id", () => {
 describe("articles queries, sort_by & order", () => {
   test("GET 200: returns articles with the default sorted_by set to created_at, with the latest first", () => {
     return request(app)
-    .get("/api/articles")
-    .expect(200)
-    .then(({ body }) => {
-      expect(body).toBeSortedBy('created_at', {
-        descending: true
-      })
-    })
-  })
-test("GET 200: created_at can also be sorted in ascending order", () => {
-  return request(app)
-  .get("/api/articles?order=asc")
-  .expect(200)
-  .then(({ body }) => {
-    expect(body).toBeSortedBy('created_at', {
-      ascending: true
-    })
-  })
-})
-test("GET 400: responds with an appropriate error message if order query is invalid", () => {
-  return request(app)
-  .get("/api/articles?order=hotdog")
-  .expect(400)
-  .then(({ body }) => {
-    console.log(body)
-    expect(body.msg).toBe("Bad request")
-  })
-})
-})
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+  test("GET 200: created_at can also be sorted in ascending order", () => {
+    return request(app)
+      .get("/api/articles?order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toBeSortedBy("created_at", {
+          ascending: true,
+        });
+      });
+  });
+  test("GET 400: responds with an appropriate error message if order query is invalid", () => {
+    return request(app)
+      .get("/api/articles?order=hotdog")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
 describe("/api/articles", () => {
   test("GET: 200 returns an array of all article objects", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-const articles = body
+        const articles = body;
         expect(Array.isArray(articles)).toBe(true);
         expect(articles.length).toBe(13);
       });
@@ -187,7 +185,7 @@ const articles = body
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        const articles = body
+        const articles = body;
         articles.forEach((article) => {
           expect(article.hasOwnProperty("comment_count"));
         });
@@ -210,7 +208,7 @@ describe("/api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        const comments = body.comments
+        const comments = body.comments;
         expect(Array.isArray(comments)).toBe(true);
         expect(comments.length).toBe(11);
         comments.forEach((comment) => {
@@ -223,7 +221,7 @@ describe("/api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        const comments = body.comments
+        const comments = body.comments;
         comments.forEach((comment) => {
           expect(comment.hasOwnProperty("comment_id"));
           expect(comment.hasOwnProperty("votes"));
@@ -510,20 +508,120 @@ describe("GET: GET /api/articles (topic query)", () => {
   });
   test("GET 200: returns an empty array if topic exists but there are no articles for it", () => {
     return request(app)
-    .get("/api/articles?topic=paper")
-    .expect(200)
-    .then(({ body }) => {
-      const response = body
-      expect(response.length).toBe(0)
-    })
-  })
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body }) => {
+        const response = body;
+        expect(response.length).toBe(0);
+      });
+  });
   test("GET 404: returns correct error message passed topic that is not a string", () => {
     return request(app)
-    .get("/api/articles?topic=sandwiches")
-    .expect(404)
-    .then(({ body }) => {
-      expect(body.msg).toBe("Topic not found")
-    })
-  })
+      .get("/api/articles?topic=sandwiches")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Topic not found");
+      });
+  });
 });
 
+describe("GET /api/users/:username", () => {
+  test("GET 200: returns a single user object", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        expect(typeof body).toBe("object");
+        expect(Array.isArray(body)).toBe(false);
+      });
+  });
+  test("GET 200:returned username object has the correct properties", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.hasOwnProperty("username"));
+        expect(body.hasOwnProperty("name"));
+        expect(body.hasOwnProperty("avatat_irl"));
+      });
+  });
+  test("GET 404: returns correct error when passed an invalid username", () => {
+    return request(app)
+      .get("/api/users/123")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("User not found");
+      });
+  });
+});
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("PATCH 200: responds with a complete comment object with all the correct properties", () => {
+    return request(app)
+      .patch("/api/comments/3")
+      .send({ inc_votes: 5 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.hasOwnProperty("comment_id"));
+        expect(body.hasOwnProperty("body"));
+        expect(body.hasOwnProperty("votes"));
+        expect(body.hasOwnProperty("author"));
+        expect(body.hasOwnProperty("article_id"));
+        expect(body.hasOwnProperty("created_at"));
+      });
+  });
+  test("PATCH 200: responds with an article object where the votes are increased by the correct amount", () => {
+    return request(app)
+      .patch("/api/comments/3")
+      .send({ inc_votes: 5 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.votes).toBe(105);
+      });
+  });
+  test("PATCH 200: responds with an article object where the votes are decreased by the correct amount", () => {
+    return request(app)
+      .patch("/api/comments/3")
+      .send({ inc_votes: -5 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.votes).toBe(95);
+      });
+  });
+  test("PATCH 400: responds with correct error when inc_vote is of invalid type", () => {
+    return request(app)
+      .patch("/api/comments/3")
+      .send({ inc_votes: "not a number" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("PATCH 400: responds with a correct error when comment_id is not valid", () => {
+    return request(app)
+      .patch("/api/comments/numberone")
+      .send({ inc_votes: 5 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("PATCH 400: responds with correct error when inc_votes is not included in the request", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("PATCH 404: responds with correct error message when given a valid but non-existent comment_id", () => {
+    return request(app)
+      .patch("/api/comments/150")
+      .send({ inc_votes: 5 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment not found");
+      });
+  });
+});
